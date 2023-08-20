@@ -1,7 +1,9 @@
 #include <Adafruit_SSD1306.h>
 #include <LoRa.h>
 
-#define DEBUG
+#include "display.h"
+
+// #define DEBUG
 
 #define BAND 915E6
 
@@ -9,6 +11,9 @@
 #define RF95_RST 3
 #define RF95_DIO0 0
 #define RF95_DIO1 1
+
+uint8_t idx;
+uint16_t value;
 
 void setup()
 {
@@ -18,6 +23,8 @@ void setup()
     while (!Serial)
         yield();
 #endif
+
+    initialiseScreen(&idx, &value);
 
     Serial.println("Receiver initialising...");
 
@@ -61,8 +68,6 @@ void loop()
     }
 
     // read packet
-    uint8_t idx;
-    uint16_t value;
     parsePacket(&idx, &value);
 
     Serial.print("Received packet with idx = ");
@@ -71,8 +76,10 @@ void loop()
     Serial.print(value, DEC);
 
     // print RSSI of packet
-    Serial.print("' with RSSI ");
+    Serial.print(" with RSSI ");
     Serial.println(LoRa.packetRssi());
+
+    updateDisplay();
 
     pulse(1, 100);
 }
